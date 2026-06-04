@@ -1,13 +1,10 @@
-package com.finflow.dto;
+package com.finflow.dto.users;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
-public class UserResponseDTO {
+public class UserRequestDTO {
 
-    private Long id;
     private String firstName;
     private String lastName;
     private String email;

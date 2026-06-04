@@ -1,6 +1,6 @@
 package com.finflow.services;
-import com.finflow.dto.UserRequestDTO;
-import com.finflow.dto.UserResponseDTO;
+import com.finflow.dto.users.UserRequestDTO;
+import com.finflow.dto.users.UserResponseDTO;
 import com.finflow.entity.User;
 import com.finflow.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +10,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepository userRepository;
     public UserResponseDTO createUser(UserRequestDTO request) {
 

@@ -1,9 +1,10 @@
 package com.finflow.controller;
 
 
-import com.finflow.dto.UserRequestDTO;
-import com.finflow.dto.UserResponseDTO;
-import com.finflow.entity.User;
+import com.finflow.dto.trasactions.UserFinancialSummaryDTO;
+import com.finflow.dto.users.UserRequestDTO;
+import com.finflow.dto.users.UserResponseDTO;
+import com.finflow.services.TransactionService;
 import com.finflow.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,8 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final TransactionService transactionService;
+
     @PostMapping
     public UserResponseDTO createUser(
             @RequestBody UserRequestDTO request) {
@@ -45,6 +48,13 @@ public class UserController {
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
+    }
+
+    @GetMapping("/{userId}/financial-summary")
+    public UserFinancialSummaryDTO getFinancialSummary(
+            @PathVariable Long userId) {
+
+        return transactionService.getFinancialSummary(userId);
     }
 
 }
