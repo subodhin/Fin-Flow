@@ -1,10 +1,7 @@
 package com.finflow.services;
 
 import com.finflow.analytics.DuplicateTransactionKey;
-import com.finflow.dto.trasactions.DuplicateTransactionDTO;
-import com.finflow.dto.trasactions.TransactionRequestDTO;
-import com.finflow.dto.trasactions.TransactionResponseDTO;
-import com.finflow.dto.trasactions.UserFinancialSummaryDTO;
+import com.finflow.dto.trasactions.*;
 import com.finflow.entity.Transaction;
 import com.finflow.entity.User;
 import com.finflow.enums.TransactionType;
@@ -14,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -165,6 +163,113 @@ public class TransactionService {
                         .description(entry.getKey().description())
                         .duplicateCount(entry.getValue())
                         .build())
+                .toList();
+    }
+
+    public List<TransactionResponseDTO> getTransactions(TransactionType type, String description, BigDecimal minAmount, BigDecimal maxAmount, String sortBy) {
+        List<Transaction> transactions = transactionRepository.findAll();
+        if (type != null) {
+            transactions = transactions.stream().filter(transaction -> transaction.getType() == type).toList();
+        }
+        if (description != null && !description.isBlank()) {
+            transactions = transactions.stream()
+                    .filter(transaction ->
+                            transaction.getDescription() != null &&
+                                    transaction.getDescription()
+                                            .toLowerCase()
+                                            .contains(description.toLowerCase()))
+                    .toList();
+        }
+        if (minAmount != null) {
+            transactions = transactions.stream()
+                    .filter(transaction ->
+                            transaction.getAmount()
+                                    .compareTo(minAmount) >= 0)
+                    .toList();
+        }
+        if (maxAmount != null) {
+            transactions = transactions.stream()
+                    .filter(transaction ->
+                            transaction.getAmount()
+                                    .compareTo(maxAmount) <= 0)
+                    .toList();
+        }
+
+        if (minAmount != null
+                && maxAmount != null
+                && minAmount.compareTo(maxAmount) > 0) {
+
+            throw new IllegalArgumentException(
+                    "minAmount cannot be greater than maxAmount");
+        }
+
+        if ("amount".equalsIgnoreCase(sortBy)) {
+            transactions = transactions.stream()
+                    .sorted(
+                            Comparator.comparing(
+                                    Transaction::getAmount
+                            )
+                    )
+                    .toList();
+        }
+
+        if ("date".equalsIgnoreCase(sortBy)) {
+            transactions = transactions.stream()
+                    .sorted(
+                            Comparator.comparing(
+                                    Transaction::getCreatedAt
+                            )
+                    )
+                    .toList();
+        }
+
+        if ("dateDesc".equalsIgnoreCase(sortBy)) {
+            transactions = transactions.stream()
+                    .sorted(
+                            Comparator.comparing(
+                                    Transaction::getCreatedAt
+                            ).reversed()
+                    )
+                    .toList();
+        }
+
+        return transactions.stream()
+                .map(transaction -> TransactionResponseDTO.builder()
+                        .id(transaction.getId())
+                        .amount(transaction.getAmount())
+                        .type(transaction.getType())
+                        .description(transaction.getDescription())
+                        .userId(transaction.getUser().getId())
+                        .build())
+                .toList();
+    }
+
+    public List<TransactionTypeSummaryDTO> getTransactionTypeSummary() {
+
+        Map<TransactionType, List<Transaction>> groupedTransactions =
+                transactionRepository.findAll()
+                        .stream()
+                        .collect(Collectors.groupingBy(
+                                Transaction::getType
+                        ));
+
+        return groupedTransactions.entrySet()
+                .stream()
+                .map(entry -> {
+
+                    BigDecimal totalAmount = entry.getValue()
+                            .stream()
+                            .map(Transaction::getAmount)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                    return TransactionTypeSummaryDTO.builder()
+                            .type(entry.getKey())
+                            .transactionCount(
+                                    (long) entry.getValue().size()
+                            )
+                            .totalAmount(totalAmount)
+                            .build();
+                })
                 .toList();
     }
 }

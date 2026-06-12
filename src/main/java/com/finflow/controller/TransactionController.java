@@ -3,11 +3,16 @@ package com.finflow.controller;
 import com.finflow.dto.trasactions.DuplicateTransactionDTO;
 import com.finflow.dto.trasactions.TransactionRequestDTO;
 import com.finflow.dto.trasactions.TransactionResponseDTO;
+import com.finflow.dto.trasactions.TransactionTypeSummaryDTO;
+import com.finflow.entity.Transaction;
+import com.finflow.enums.TransactionType;
 import com.finflow.services.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/transactions")
@@ -28,10 +33,10 @@ public class TransactionController {
         return transactionService.getTransactionById(id);
     }
 
-    @GetMapping
-    public List<TransactionResponseDTO> getAllTransactions() {
-        return transactionService.getAllTransactions();
-    }
+//    @GetMapping
+//    public List<TransactionResponseDTO> getAllTransactions() {
+//        return transactionService.getAllTransactions();
+//    }
 
     @PutMapping("/{id}")
     public TransactionResponseDTO updateTransaction(
@@ -50,6 +55,28 @@ public class TransactionController {
     @GetMapping("/duplicates")
     public List<DuplicateTransactionDTO> getDuplicates() {
         return transactionService.getDuplicateTransactions();
+    }
+
+    @GetMapping
+    public List<TransactionResponseDTO> getTransactions(
+            @RequestParam(required = false) TransactionType type,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) BigDecimal minAmount,
+            @RequestParam(required = false) BigDecimal maxAmount,
+            @RequestParam(required = false) String sortBy) {
+
+        return transactionService.getTransactions(
+                type,
+                description,
+                minAmount,
+                maxAmount,
+                sortBy);
+    }
+
+    @GetMapping("/group-by-type")
+    public List<TransactionTypeSummaryDTO> getTransactionTypeSummary() {
+
+        return transactionService.getTransactionTypeSummary();
     }
 
 
