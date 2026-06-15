@@ -5,6 +5,7 @@ import com.finflow.dto.trasactions.*;
 import com.finflow.entity.Transaction;
 import com.finflow.entity.User;
 import com.finflow.enums.TransactionType;
+import com.finflow.exception.ResourceNotFoundException;
 import com.finflow.repository.TransactionRepository;
 import com.finflow.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -26,7 +27,9 @@ public class TransactionService {
     public TransactionResponseDTO createTransaction (TransactionRequestDTO request){
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id " + request.getUserId()));
 
         Transaction transaction = Transaction.builder()
                 .amount(request.getAmount())
@@ -49,7 +52,9 @@ public class TransactionService {
     public TransactionResponseDTO getTransactionById(Long id) {
 
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Transaction not found with id " + id));
 
         return TransactionResponseDTO.builder()
                 .id(transaction.getId())
@@ -78,10 +83,14 @@ public class TransactionService {
             TransactionRequestDTO request) {
 
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "transaction not found with id " + id));
 
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "User not found with id " + id));
 
         transaction.setAmount(request.getAmount());
         transaction.setType(request.getType());
@@ -102,7 +111,9 @@ public class TransactionService {
     public void deleteTransaction(Long id) {
 
         Transaction transaction = transactionRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "transaction not found with id " + id));
 
         transactionRepository.delete(transaction);
     }

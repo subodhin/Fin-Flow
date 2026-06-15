@@ -7,6 +7,7 @@ import com.finflow.dto.trasactions.TransactionTypeSummaryDTO;
 import com.finflow.entity.Transaction;
 import com.finflow.enums.TransactionType;
 import com.finflow.services.TransactionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping
-    public TransactionResponseDTO createTransaction(@RequestBody TransactionRequestDTO request) {
+    public TransactionResponseDTO createTransaction(@Valid @RequestBody TransactionRequestDTO request) {
         return transactionService.createTransaction(request);
     }
 
@@ -33,15 +34,10 @@ public class TransactionController {
         return transactionService.getTransactionById(id);
     }
 
-//    @GetMapping
-//    public List<TransactionResponseDTO> getAllTransactions() {
-//        return transactionService.getAllTransactions();
-//    }
-
     @PutMapping("/{id}")
     public TransactionResponseDTO updateTransaction(
-            @PathVariable Long id,
-            @RequestBody TransactionRequestDTO request) {
+           @PathVariable Long id,
+           @Valid  @RequestBody TransactionRequestDTO request) {
 
         return transactionService.updateTransaction(id, request);
     }
