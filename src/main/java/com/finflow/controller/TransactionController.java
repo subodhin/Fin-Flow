@@ -9,6 +9,7 @@ import com.finflow.enums.TransactionType;
 import com.finflow.services.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -53,20 +54,40 @@ public class TransactionController {
         return transactionService.getDuplicateTransactions();
     }
 
+//    @GetMapping
+//    public List<TransactionResponseDTO> getTransactions(
+//            @RequestParam(required = false) TransactionType type,
+//            @RequestParam(required = false) String description,
+//            @RequestParam(required = false) BigDecimal minAmount,
+//            @RequestParam(required = false) BigDecimal maxAmount,
+//            @RequestParam(required = false) String sortBy) {
+//
+//        return transactionService.getTransactions(
+//                type,
+//                description,
+//                minAmount,
+//                maxAmount,
+//                sortBy);
+//    }
+
     @GetMapping
-    public List<TransactionResponseDTO> getTransactions(
+    public Page<TransactionResponseDTO> getTransactions(
             @RequestParam(required = false) TransactionType type,
             @RequestParam(required = false) String description,
             @RequestParam(required = false) BigDecimal minAmount,
             @RequestParam(required = false) BigDecimal maxAmount,
-            @RequestParam(required = false) String sortBy) {
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
         return transactionService.getTransactions(
                 type,
                 description,
                 minAmount,
                 maxAmount,
-                sortBy);
+                sortBy,
+                page,
+                size);
     }
 
     @GetMapping("/group-by-type")
@@ -74,6 +95,7 @@ public class TransactionController {
 
         return transactionService.getTransactionTypeSummary();
     }
+
 
 
 

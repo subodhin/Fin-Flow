@@ -9,6 +9,10 @@ import com.finflow.exception.ResourceNotFoundException;
 import com.finflow.repository.TransactionRepository;
 import com.finflow.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -177,11 +181,101 @@ public class TransactionService {
                 .toList();
     }
 
-    public List<TransactionResponseDTO> getTransactions(TransactionType type, String description, BigDecimal minAmount, BigDecimal maxAmount, String sortBy) {
+//    public List<TransactionResponseDTO> getTransactions(TransactionType type, String description, BigDecimal minAmount, BigDecimal maxAmount, String sortBy) {
+//        List<Transaction> transactions = transactionRepository.findAll();
+//        if (type != null) {
+//            transactions = transactions.stream().filter(transaction -> transaction.getType() == type).toList();
+//        }
+//        if (description != null && !description.isBlank()) {
+//            transactions = transactions.stream()
+//                    .filter(transaction ->
+//                            transaction.getDescription() != null &&
+//                                    transaction.getDescription()
+//                                            .toLowerCase()
+//                                            .contains(description.toLowerCase()))
+//                    .toList();
+//        }
+//        if (minAmount != null) {
+//            transactions = transactions.stream()
+//                    .filter(transaction ->
+//                            transaction.getAmount()
+//                                    .compareTo(minAmount) >= 0)
+//                    .toList();
+//        }
+//        if (maxAmount != null) {
+//            transactions = transactions.stream()
+//                    .filter(transaction ->
+//                            transaction.getAmount()
+//                                    .compareTo(maxAmount) <= 0)
+//                    .toList();
+//        }
+//
+//        if (minAmount != null
+//                && maxAmount != null
+//                && minAmount.compareTo(maxAmount) > 0) {
+//
+//            throw new IllegalArgumentException(
+//                    "minAmount cannot be greater than maxAmount");
+//        }
+//
+//        if ("amount".equalsIgnoreCase(sortBy)) {
+//            transactions = transactions.stream()
+//                    .sorted(
+//                            Comparator.comparing(
+//                                    Transaction::getAmount
+//                            )
+//                    )
+//                    .toList();
+//        }
+//
+//        if ("date".equalsIgnoreCase(sortBy)) {
+//            transactions = transactions.stream()
+//                    .sorted(
+//                            Comparator.comparing(
+//                                    Transaction::getCreatedAt
+//                            )
+//                    )
+//                    .toList();
+//        }
+//
+//        if ("dateDesc".equalsIgnoreCase(sortBy)) {
+//            transactions = transactions.stream()
+//                    .sorted(
+//                            Comparator.comparing(
+//                                    Transaction::getCreatedAt
+//                            ).reversed()
+//                    )
+//                    .toList();
+//        }
+//
+//        return transactions.stream()
+//                .map(transaction -> TransactionResponseDTO.builder()
+//                        .id(transaction.getId())
+//                        .amount(transaction.getAmount())
+//                        .type(transaction.getType())
+//                        .description(transaction.getDescription())
+//                        .userId(transaction.getUser().getId())
+//                        .build())
+//                .toList();
+//    }
+
+    public Page<TransactionResponseDTO> getTransactions(
+            TransactionType type,
+            String description,
+            BigDecimal minAmount,
+            BigDecimal maxAmount,
+            String sortBy,
+            int page,
+            int size) {
+
         List<Transaction> transactions = transactionRepository.findAll();
+
         if (type != null) {
-            transactions = transactions.stream().filter(transaction -> transaction.getType() == type).toList();
+            transactions = transactions.stream()
+                    .filter(transaction -> transaction.getType() == type)
+                    .toList();
         }
+
         if (description != null && !description.isBlank()) {
             transactions = transactions.stream()
                     .filter(transaction ->
@@ -191,6 +285,7 @@ public class TransactionService {
                                             .contains(description.toLowerCase()))
                     .toList();
         }
+
         if (minAmount != null) {
             transactions = transactions.stream()
                     .filter(transaction ->
@@ -198,6 +293,7 @@ public class TransactionService {
                                     .compareTo(minAmount) >= 0)
                     .toList();
         }
+
         if (maxAmount != null) {
             transactions = transactions.stream()
                     .filter(transaction ->
@@ -216,21 +312,13 @@ public class TransactionService {
 
         if ("amount".equalsIgnoreCase(sortBy)) {
             transactions = transactions.stream()
-                    .sorted(
-                            Comparator.comparing(
-                                    Transaction::getAmount
-                            )
-                    )
+                    .sorted(Comparator.comparing(Transaction::getAmount))
                     .toList();
         }
 
         if ("date".equalsIgnoreCase(sortBy)) {
             transactions = transactions.stream()
-                    .sorted(
-                            Comparator.comparing(
-                                    Transaction::getCreatedAt
-                            )
-                    )
+                    .sorted(Comparator.comparing(Transaction::getCreatedAt))
                     .toList();
         }
 
@@ -244,15 +332,29 @@ public class TransactionService {
                     .toList();
         }
 
-        return transactions.stream()
-                .map(transaction -> TransactionResponseDTO.builder()
-                        .id(transaction.getId())
-                        .amount(transaction.getAmount())
-                        .type(transaction.getType())
-                        .description(transaction.getDescription())
-                        .userId(transaction.getUser().getId())
-                        .build())
-                .toList();
+        List<TransactionResponseDTO> dtoList =
+                transactions.stream()
+                        .map(transaction ->
+                                TransactionResponseDTO.builder()
+                                        .id(transaction.getId())
+                                        .amount(transaction.getAmount())
+                                        .type(transaction.getType())
+                                        .description(transaction.getDescription())
+                                        .userId(transaction.getUser().getId())
+                                        .build())
+                        .toList();
+
+        int start = page * size;
+        int end = Math.min(start + size, dtoList.size());
+
+        List<TransactionResponseDTO> pagedList =
+                dtoList.subList(start, end);
+
+        return new PageImpl<>(
+                pagedList,
+                PageRequest.of(page, size),
+                dtoList.size()
+        );
     }
 
     public List<TransactionTypeSummaryDTO> getTransactionTypeSummary() {
@@ -283,4 +385,26 @@ public class TransactionService {
                 })
                 .toList();
     }
+
+//
+//    public Page<TransactionResponseDTO> getTransactions(
+//            int page,
+//            int size) {
+//
+//        Pageable pageable =
+//                PageRequest.of(page, size);
+//
+//        Page<Transaction> transactions =
+//                transactionRepository.findAll(pageable);
+//
+//        return transactions.map(transaction ->
+//                TransactionResponseDTO.builder()
+//                        .id(transaction.getId())
+//                        .amount(transaction.getAmount())
+//                        .type(transaction.getType())
+//                        .description(transaction.getDescription())
+//                        .userId(transaction.getUser().getId())
+//                        .build()
+//        );
+//    }
 }
