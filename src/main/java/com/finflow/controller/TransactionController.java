@@ -70,22 +70,34 @@ public class TransactionController {
 //                sortBy);
 //    }
 
-    @GetMapping
+//    @GetMapping temp
+//    public Page<TransactionResponseDTO> getTransactions(
+//            @RequestParam(required = false) TransactionType type,
+//            @RequestParam(required = false) String description,
+//            @RequestParam(required = false) BigDecimal minAmount,
+//            @RequestParam(required = false) BigDecimal maxAmount,
+//            @RequestParam(required = false) String sortBy,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size) {
+//
+//        return transactionService.getTransactions(
+//                type,
+//                description,
+//                minAmount,
+//                maxAmount,
+//                sortBy,
+//                page,
+//                size);
+//    }
+
+    @GetMapping("/paged")
     public Page<TransactionResponseDTO> getTransactions(
             @RequestParam(required = false) TransactionType type,
-            @RequestParam(required = false) String description,
-            @RequestParam(required = false) BigDecimal minAmount,
-            @RequestParam(required = false) BigDecimal maxAmount,
-            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        return transactionService.getTransactions(
-                type,
-                description,
-                minAmount,
-                maxAmount,
-                sortBy,
+        return transactionService.getTransactions(type, userId,
                 page,
                 size);
     }
@@ -94,6 +106,28 @@ public class TransactionController {
     public List<TransactionTypeSummaryDTO> getTransactionTypeSummary() {
 
         return transactionService.getTransactionTypeSummary();
+    }
+
+    @GetMapping("/testDerivedQuery")
+    public Page<TransactionResponseDTO> getTransactionsAboveAmount(
+            @RequestParam BigDecimal amount,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return transactionService.getTransactionsAboveAmount(amount, page, size);
+    }
+
+    @GetMapping("/native")
+    public Page<TransactionResponseDTO> getTransactionsAboveAmountNative(
+            @RequestParam BigDecimal amount,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return transactionService
+                .getTransactionsAboveAmountNative(
+                        amount,
+                        page,
+                        size);
     }
 
 
