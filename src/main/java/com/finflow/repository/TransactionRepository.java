@@ -5,6 +5,7 @@ import com.finflow.entity.Transaction;
 import com.finflow.enums.TransactionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -50,6 +51,9 @@ public interface TransactionRepository extends JpaRepository<com.finflow.entity.
     Page<Transaction> findTransactionsAboveAmountNative(
             @Param("amount") BigDecimal amount,
             Pageable pageable);
+
+    @EntityGraph(attributePaths = "user")
+    Page<Transaction> findAll(Pageable pageable);
 }
 
 
