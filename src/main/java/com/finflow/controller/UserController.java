@@ -1,9 +1,11 @@
 package com.finflow.controller;
 
 
+import com.finflow.dto.storedProsedures.FinancialSummaryDTO;
 import com.finflow.dto.trasactions.UserFinancialSummaryDTO;
 import com.finflow.dto.users.UserRequestDTO;
 import com.finflow.dto.users.UserResponseDTO;
+import com.finflow.services.FinancialSummaryService;
 import com.finflow.services.TransactionService;
 import com.finflow.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class UserController {
 
     private final UserService userService;
     private final TransactionService transactionService;
+    private final FinancialSummaryService financialSummaryService;
 
     @PostMapping
     public UserResponseDTO createUser(
@@ -56,5 +59,14 @@ public class UserController {
 
         return transactionService.getFinancialSummary(userId);
     }
+
+    @GetMapping("/{userId}/financial-summary/pr")
+    public FinancialSummaryDTO getFinancialSummaryPr(
+            @PathVariable Long userId) {
+
+        return financialSummaryService.getFinancialSummaryPr(userId);
+    }
+
+
 
 }

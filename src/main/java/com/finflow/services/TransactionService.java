@@ -8,6 +8,7 @@ import com.finflow.enums.TransactionType;
 import com.finflow.exception.ResourceNotFoundException;
 import com.finflow.repository.TransactionRepository;
 import com.finflow.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
