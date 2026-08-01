@@ -15,7 +15,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-//session block - test
+//session block -  test
         http
                 .csrf(csrf -> csrf.disable())
 
